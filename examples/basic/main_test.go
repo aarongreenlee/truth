@@ -26,10 +26,10 @@ func TestHelloWorld(t *testing.T) {
 	}
 
 	tests := truth.TestCases{
+		// This is a simple example. We name the test, verify the
+		// response equals our expectation exactly, and we also verify
+		// a `200 OK` response code (by default).
 		{
-			// This is a simple example. We name the test, verify the
-			// response equals our expectation exactly, and we also verify
-			// a `200 OK` response code (by default).
 			Name:       "Response body should equal",
 			ExpectBody: []byte("Hello world!"),
 		},
@@ -56,7 +56,7 @@ func TestHelloWorld(t *testing.T) {
 		// Like the previous test but we expect a 200 OK this time.
 		{
 			// Example using a custom URL.
-			Name: "Custom URL example",
+			Name:   "Custom URL example",
 			Path:   "/helloworld?abc",
 			Status: 200,
 		},
@@ -82,7 +82,6 @@ func TestHelloWorld(t *testing.T) {
 				}
 			},
 		},
-
 	}
 
 	// Print some basic output as the tests run.
