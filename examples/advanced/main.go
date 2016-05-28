@@ -1,5 +1,8 @@
-// Package main is a basic example of how to perform integration testing in-process
-// using the Truth package. This method allows test coverage to be calculated by Go.
+// Package main is a demonstration application placed under test. This application
+// allows users to be created, confirmed, and returned using an in-memory database.
+//
+// The objective of this application is to implement a multi-step workflow that we
+// can place under test to demonstrate the Truth package.
 package main
 
 import (
