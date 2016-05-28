@@ -43,13 +43,13 @@ type (
 	}
 )
 
-func (tc *TestCase) init(def Definition, n int, caller string) {
+func (tc *TestCase) init(def Definition, n, count int, caller string) {
 	if tc.Path == "" {
 		tc.Path = def.Path
 	}
 
 	if tc.Name == "" {
-		tc.Name = fmt.Sprintf("#%d for '%s:%s' called from %s", n, def.Method, def.Path, caller)
+		tc.Name = fmt.Sprintf("'%s:%s' (%d of %d) called from %s", def.Method, def.Path, n + 1, count + 1, caller)
 	}
 
 	tc.alias = "Testcase: " + tc.Name
@@ -57,6 +57,6 @@ func (tc *TestCase) init(def Definition, n int, caller string) {
 
 func (cases TestCases) init(def Definition, caller string) {
 	for i, tc := range cases {
-		tc.init(def, i, caller)
+		tc.init(def, i, len(cases), caller)
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"os"
 )
 
 type (
@@ -185,10 +186,15 @@ func preflight(def Definition, path string) error {
 }
 
 func getCaller(depth int) string {
+	gopath, gok := os.LookupEnv("GOPATH")
+
 	_, file, line, ok := runtime.Caller(depth)
 
 	if ok {
-		return fmt.Sprintf("%s:%d", file, line)
+		if gok {
+			file = strings.Replace(file, gopath + "/src/", "", 1)
+		}
+		return fmt.Sprintf("'%s:%d'", file, line)
 	}
 
 	return ""

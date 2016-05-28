@@ -11,7 +11,7 @@ import (
 // exception of actually listening on a port. We won't need to listen on a port
 // for integration testing since we're calling the ServeMux directly.
 func SetupTest() {
-	configure()
+	bootstrap()
 	truth.SetMux(mux)
 }
 
