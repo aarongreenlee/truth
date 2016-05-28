@@ -1,13 +1,13 @@
 package truth
 
 import (
-	"net/http"
-	"io/ioutil"
-	"io"
-	"fmt"
-	"strings"
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type (

@@ -1,15 +1,15 @@
 package truth
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-	"fmt"
-	"errors"
-	"bytes"
-	"io/ioutil"
+	"runtime"
 	"strings"
-	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 type (
@@ -18,9 +18,12 @@ type (
 
 // RunIntegrationTests runs integration or full-stack tests using the provided metadata and test cases.
 // Provide a client to perform full-stack. If nil is provided the server's Mux will be called directly.
-func RunIntegrationTests(t *testing.T, md Definition, cases []TestCase, c *Client) error {
+func RunIntegrationTests(t *testing.T, def Definition, cases TestCases, c *Client) error {
+
+	cases.init(def, getCaller(2))
+
 	for _, tc := range cases {
-		if err := NewRunner(c)(t, md, tc); err != nil {
+		if err := NewRunner(c)(t, def, *tc); err != nil {
 			t.Error(err)
 			t.FailNow()
 
@@ -32,6 +35,7 @@ func RunIntegrationTests(t *testing.T, md Definition, cases []TestCase, c *Clien
 }
 
 var integrationClient *Client
+
 func init() {
 	integrationClient = NewClient("")
 }
@@ -44,16 +48,31 @@ func SetMux(mux *http.ServeMux) {
 	muxUnderTest = mux
 }
 
+var printTestRuns, verbose bool
+
+func TogglePrintAsTestsRun() {
+	printTestRuns = !printTestRuns
+}
+
+func ToggleVerbose() {
+	printTestRuns = true
+	verbose = !verbose
+}
+
 // NewRunner builds a function to test an API endpoint. Provide a client to perform a full-stack call
 // to a webserver. Without a client the server MUX will be called directly to perform the test in-process.
 func NewRunner(c *Client) Runner {
 	return func(t *testing.T, def Definition, tc TestCase) error {
-		// Simplify reference to failures
-		alias := "Testcase: " + tc.Name
+
+		print := (verbose || tc.Verbose)
+
+		if printTestRuns {
+			fmt.Printf("Running %#v\n", tc.alias)
+		}
 
 		// Basic sanity check that the metadata is valid.
 		if err := preflight(def, tc.Path); err != nil {
-			return fmt.Errorf("%s: Preflight failed: %s", alias, err.Error())
+			return fmt.Errorf("%s: Preflight failed: %s", tc.alias, err.Error())
 		}
 
 		// Prepare to execute the request.
@@ -66,7 +85,7 @@ func NewRunner(c *Client) Runner {
 			var rsp *http.Response
 			rsp, body, err = c.MakeRequest(def, tc, nil)
 			if err != nil {
-				return fmt.Errorf("%s: Unable to make HTTP request: %s", alias, err.Error())
+				return fmt.Errorf("%s: Unable to make HTTP request: %s", tc.alias, err.Error())
 			}
 			// Copy the response into recorder
 			RR.Code = rsp.StatusCode
@@ -83,20 +102,25 @@ func NewRunner(c *Client) Runner {
 				return err
 			}
 
-			if tc.Verbose {
-				fmt.Printf("Simulating call to `%s:%s`\n", req.Method, req.RequestURI)
+			if print {
+				fmt.Printf("Calling the server mix call to `%s:%s`\n", req.Method, req.RequestURI)
 			}
 
 			muxUnderTest.ServeHTTP(RR, req)
 
 			body, err = ioutil.ReadAll(RR.Body)
 			if err != nil {
-				return fmt.Errorf("%s: Unable to read response from Response Recorder: %s", alias, err.Error())
+				return fmt.Errorf("%s: Unable to read response from Response Recorder: %s", tc.alias, err.Error())
 			}
 		}
 
+		// Default to a 200 OK Expectation
+		if tc.Status == 0 {
+			tc.Status = 200
+		}
+
 		if RR.Code != tc.Status {
-			t.Errorf("%s: Expected statuscode %d but received %d", alias, tc.Status, RR.Code)
+			t.Errorf("%s: Expected statuscode %d but received %d", tc.alias, tc.Status, RR.Code)
 			return nil
 		}
 
@@ -104,12 +128,12 @@ func NewRunner(c *Client) Runner {
 		// If so, we won't bother with any deeper testing of the body than this exact match check.
 		if tc.ExpectBody != nil {
 			if len(body) == 0 {
-				t.Errorf("%s: Empty response body when a error response was expected", alias)
+				t.Errorf("%s: Empty response body when a error response was expected", tc.alias)
 				return nil
 			}
 
 			if bytes.Compare(body, tc.ExpectBody) != 0 {
-				assert.EqualValues(t, string(tc.ExpectBody), string(body), fmt.Sprintf("%s: Response was not an exact match", alias))
+				assert.EqualValues(t, string(tc.ExpectBody), string(body), fmt.Sprintf("%s: Response was not an exact match", tc.alias))
 			}
 
 			return nil
@@ -121,17 +145,17 @@ func NewRunner(c *Client) Runner {
 			content := string(body)
 			for i, q := range tc.Contains {
 				if !strings.Contains(content, q) {
-					t.Errorf("%s: Response body did not contain search term #%d %#v", alias, i, q)
+					t.Errorf("%s: Response body did not contain search term #%d %#v", tc.alias, i, q)
 				}
 			}
 		}
 
 		if tc.Integration != nil {
 			tc.Integration(Integration{
-				T:    t,
-				TC:   tc,
-				Body: body,
-				RR:   RR,
+				T:      t,
+				TC:     tc,
+				Body:   body,
+				RR:     RR,
 				Client: c,
 			})
 		}
@@ -149,13 +173,23 @@ func preflight(def Definition, path string) error {
 		return fmt.Errorf("HTTP method %#v is not supported", def.Method)
 	}
 
-	if def.MIMETypeRequest == "" {
-		return errors.New("MIMETypeRequest is not defined in metadata")
-	}
-
-	if def.MIMETypeResponse == "" {
-		return errors.New("MIMETypeResponse is not defined in metadata")
-	}
+	//if def.MIMETypeRequest == "" {
+	//	return errors.New("MIMETypeRequest is not defined in metadata")
+	//}
+	//
+	//if def.MIMETypeResponse == "" {
+	//	return errors.New("MIMETypeResponse is not defined in metadata")
+	//}
 
 	return nil
+}
+
+func getCaller(depth int) string {
+	_, file, line, ok := runtime.Caller(depth)
+
+	if ok {
+		return fmt.Sprintf("%s:%d", file, line)
+	}
+
+	return ""
 }
