@@ -19,6 +19,8 @@ type (
 		ExpectBody []byte
 		Contains   []string
 
+		Result interface{}
+
 		Verbose     bool
 		Integration func(Integration)
 		Unit        func(Unit)

@@ -3,10 +3,10 @@ package truth
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"encoding/json"
 	"runtime"
 	"strings"
 	"testing"
@@ -42,10 +42,10 @@ func init() {
 }
 
 // Mux under test
-var muxUnderTest *http.ServeMux
+var muxUnderTest http.Handler
 
 // SetMux allows the mux under test to be access by the truth test harness.
-func SetMux(mux *http.ServeMux) {
+func SetMux(mux http.Handler) {
 	muxUnderTest = mux
 }
 
@@ -121,7 +121,7 @@ func NewRunner(c *Client) Runner {
 		}
 
 		if RR.Code != tc.Status {
-			t.Errorf("%s: Expected statuscode %d but received %d", tc.alias, tc.Status, RR.Code)
+			t.Errorf("%s: Expected statuscode %d but received %d at `%s:%s`", tc.alias, tc.Status, RR.Code, def.Method, tc.Path)
 			return nil
 		}
 
@@ -133,8 +133,9 @@ func NewRunner(c *Client) Runner {
 				return nil
 			}
 
-			if bytes.Compare(body, tc.ExpectBody) != 0 {
-				assert.EqualValues(t, string(tc.ExpectBody), string(body), fmt.Sprintf("%s: Response was not an exact match", tc.alias))
+			if 0 != bytes.Compare(body, tc.ExpectBody) {
+				t.Fatalf("%s: Response was not an exact match", tc.alias)
+				return nil
 			}
 
 			return nil
@@ -148,6 +149,15 @@ func NewRunner(c *Client) Runner {
 				if !strings.Contains(content, q) {
 					t.Errorf("%s: Response body did not contain search term #%d %#v", tc.alias, i, q)
 				}
+			}
+		}
+
+		if tc.Result != nil {
+			// TODO Use the decoders
+			if err := json.Unmarshal(body, &tc.Result); err != nil {
+				t.Fatalf("%s: Unable to decode response into Result %#T", tc.Result)
+				tc.Result = nil
+				return nil
 			}
 		}
 

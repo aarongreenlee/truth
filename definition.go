@@ -6,8 +6,8 @@ type (
 		// Properties that drive behavior.
 		Method           string
 		Path             string
-		MIMETypeResponse string
 		MIMETypeRequest  string
+		MIMETypeResponse string
 
 		// Documentation properties.
 		Package     string

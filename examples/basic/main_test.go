@@ -39,7 +39,7 @@ func TestHelloWorld(t *testing.T) {
 		// lets the Truth test harness name the test case something
 		// like:
 		//
-		// `Testcase: (2 of 7) 'GET:/helloworld' called from {some/file:66}`.
+		// `Testcase: #2 for 'GET:/helloworld' called from {some/file:66}`.
 		//
 		// This test basically confirms we have a `200 OK ` status code
 		// when we call the endpoint defined in the Definition.
