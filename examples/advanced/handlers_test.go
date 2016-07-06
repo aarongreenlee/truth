@@ -13,13 +13,13 @@ func TestCreateUser(t *testing.T) {
 	SetupTest()
 
 	var (
-		name = "Testy Mc. TestFace"
+		name  = "Testy Mc. TestFace"
 		email = "testy.mc.t@example.com"
 	)
 
 	tests := truth.TestCases{
 		SuccessfulRegistration(User{
-			Name: &name,
+			Name:  &name,
 			Email: &email,
 		}),
 	}
@@ -36,10 +36,10 @@ func SuccessfulRegistration(user User) *truth.TestCase {
 	result := &User{}
 
 	tc := truth.TestCase{
-		Name: "Successful User Registration",
+		Name:    "Successful User Registration",
 		Payload: user,
-		Status: http.StatusCreated,
-		Result: result,
+		Status:  http.StatusCreated,
+		Result:  result,
 	}
 
 	tc.Integration = func(t truth.Integration) {
@@ -58,8 +58,8 @@ func SuccessfulRegistration(user User) *truth.TestCase {
 		}
 
 		// Sweet! The database serialization was what we would expect.
+		// Now, let's get the token so we can unlock the user.
 	}
 
 	return &tc
 }
-

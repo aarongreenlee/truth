@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 
 	"github.com/aarongreenlee/truth"
-
 )
 
 // *********************************************************************************
@@ -23,13 +22,13 @@ import (
 // with the Multiplexer. It also can be used to simplify tests, generate documentation and generate
 // client code.
 var createUserDef = truth.Definition{
-	Method: http.MethodPost,
-	Path: "/users",
-	MIMETypeRequest: "application/json",
+	Method:           http.MethodPost,
+	Path:             "/users",
+	MIMETypeRequest:  "application/json",
 	MIMETypeResponse: "application/json",
-	Package: "main",
-	Name: "Create User",
-	Description: "Create a new user using the provided values.",
+	Package:          "main",
+	Name:             "Create User",
+	Description:      "Create a new user using the provided values.",
 }
 
 // createUser is a demonstration of what "Create User" service might be like in your
@@ -107,7 +106,6 @@ func onCreateUser(res http.ResponseWriter, r *http.Request, params url.Values) {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
 
 		res.WriteHeader(http.StatusCreated)
 		res.Write(response)
