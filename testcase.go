@@ -51,7 +51,7 @@ func (tc *TestCase) init(def Definition, n, count int, caller string) {
 	}
 
 	if tc.Name == "" {
-		tc.Name = fmt.Sprintf("'%s:%s' (%d of %d) called from %s", def.Method, def.Path, n + 1, count + 1, caller)
+		tc.Name = fmt.Sprintf("'%s:%s' (%d of %d) called from %s", def.Method, def.Path, n+1, count+1, caller)
 	}
 
 	tc.alias = "Testcase: " + tc.Name

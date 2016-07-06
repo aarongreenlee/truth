@@ -2,15 +2,15 @@ package truth
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"encoding/json"
+	"os"
 	"runtime"
 	"strings"
 	"testing"
-	"os"
 )
 
 type (
@@ -202,7 +202,7 @@ func getCaller(depth int) string {
 
 	if ok {
 		if gok {
-			file = strings.Replace(file, gopath + "/src/", "", 1)
+			file = strings.Replace(file, gopath+"/src/", "", 1)
 		}
 		return fmt.Sprintf("'%s:%d'", file, line)
 	}
