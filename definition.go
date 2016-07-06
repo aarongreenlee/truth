@@ -1,8 +1,8 @@
 package truth
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 )
 
 const (
@@ -34,10 +34,12 @@ type (
 		Authenticated  bool
 		Authentication string
 
-		// Documentation properties.
-		Package     string
-		Description string
-		Name        string
+		// Attributes for documentation and logging.
+
+		Package     string // Unique name or path to the package. Useful for generated documentation.
+		Description string // Description of the endpoint to be used in generated documentation.
+		Name        string // Name of the endpoint to be used in generated documentation.
+		StatsKey    string // Key for instrumentation metrics.
 
 		initialized bool
 	}
