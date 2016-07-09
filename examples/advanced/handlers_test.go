@@ -5,6 +5,9 @@ import (
 	"testing"
 
 	"github.com/aarongreenlee/truth"
+
+	// Truth is a test runner. It does demand any specific assertion library.
+	// This example shows how one could apply on Testify.
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,9 +59,6 @@ func SuccessfulRegistration(user User) *truth.TestCase {
 			assert.Equal(t.T, *user.Name, *dbUser.Name, "Serialized Name")
 			assert.Equal(t.T, *user.Email, *dbUser.Email, "Serialized E-mail")
 		}
-
-		// Sweet! The database serialization was what we would expect.
-		// Now, let's get the token so we can unlock the user.
 	}
 
 	return &tc
