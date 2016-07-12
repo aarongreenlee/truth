@@ -60,6 +60,20 @@ func ToggleVerbose() {
 	verbose = !verbose
 }
 
+var (
+	optionsDef                = Definition{Method: "OPTIONS"}
+	accessControlAllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	accessControlAllowOrigin  = []string{"*"}
+)
+
+func SetAccessControlAllowHeaders(h []string) {
+	accessControlAllowHeaders = h
+}
+
+func SetAccessControlAllowOrigin(h []string) {
+	accessControlAllowOrigin = h
+}
+
 // NewRunner builds a function to test an API endpoint. Provide a client to perform a full-stack call
 // to a webserver. Without a client the server MUX will be called directly to perform the test in-process.
 func NewRunner(c *Client) Runner {
@@ -84,6 +98,31 @@ func NewRunner(c *Client) Runner {
 		if c != nil {
 			var err error
 			var rsp *http.Response
+			if tc.Options {
+				rsp, _, err = c.MakeRequest(optionsDef, tc, nil)
+				if err != nil {
+					return fmt.Errorf("%s: Unable to make HTTP Options request: %s", tc.alias, err.Error())
+				}
+
+				chk := true
+
+				if !compHeaders(rsp.Header["Access-Control-Allow-Methods"], []string{def.Method}, false) {
+					chk = false
+				}
+
+				if !compHeaders(rsp.Header["Access-Control-Allow-Headers"], accessControlAllowHeaders, true) {
+					chk = false
+				}
+
+				if !compHeaders(rsp.Header["Access-Control-Allow-Origin"], accessControlAllowOrigin, true) {
+					chk = false
+				}
+
+				if chk == false {
+					return fmt.Errorf("Options Test Failed: Method %s not available via %s for test %s", def.Method, tc.Path, tc.Name)
+				}
+			}
+
 			rsp, body, err = c.MakeRequest(def, tc, nil)
 			if err != nil {
 				return fmt.Errorf("%s: Unable to make HTTP request: %s", tc.alias, err.Error())
@@ -97,6 +136,32 @@ func NewRunner(c *Client) Runner {
 		} else {
 			var err error
 			var req *http.Request
+
+			if tc.Options {
+				req, err = integrationClient.BuildRequest(optionsDef, tc)
+				if err != nil {
+					return err
+				}
+
+				muxUnderTest.ServeHTTP(RR, req)
+
+				chk := true
+				if !compHeaders(RR.HeaderMap["Access-Control-Allow-Methods"], []string{def.Method}, false) {
+					chk = false
+				}
+
+				if !compHeaders(RR.HeaderMap["Access-Control-Allow-Headers"], accessControlAllowHeaders, true) {
+					chk = false
+				}
+
+				if !compHeaders(RR.HeaderMap["Access-Control-Allow-Origin"], accessControlAllowOrigin, true) {
+					chk = false
+				}
+
+				if chk == false {
+					return fmt.Errorf("Options Test Failed: Method %s not available via %s for test %s", def.Method, tc.Path, tc.Name)
+				}
+			}
 
 			req, err = integrationClient.BuildRequest(def, tc)
 			if err != nil {
@@ -208,4 +273,41 @@ func getCaller(depth int) string {
 	}
 
 	return ""
+}
+
+func compHeaders(a, b []string, strict bool) bool {
+	if strict && len(a) != len(b) {
+		return false
+	}
+
+	// verify that every element of b is in a
+	for _, v := range b {
+		if !chkIn(a, v) {
+			return false
+		}
+	}
+
+	if !strict {
+		return true
+	}
+
+	// if strict ensure that all elements of a
+	// are in b
+	for _, v := range a {
+		if !chkIn(b, v) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func chkIn(a []string, b string) bool {
+	for _, v := range a {
+		if v == b {
+			return true
+		}
+	}
+
+	return false
 }
