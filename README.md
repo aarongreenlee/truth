@@ -3,5 +3,5 @@ Truth establishes a single source of truth for your API documentation, unit test
 
 This project was started while I was on vacation April 2016 and is under heavy development. Version 1.0 is right around the corner. Come back soon.
 
-# API Documentation
-[Check out the golang docs](https://godoc.org/github.com/aarongreenlee/truth)
+# Links
+[Exported API via GoDocs](https://godoc.org/github.com/aarongreenlee/truth)
