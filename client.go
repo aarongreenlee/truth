@@ -69,7 +69,7 @@ func (c Client) BuildRequest(def Definition, tc TestCase) (*http.Request, error)
 			fmt.Printf("Err encoding payload into URL string.  Error: %v.\n", err)
 			return nil, err
 		}
-		tc.Payload = fmt.Sprintf("%s?%s", v.Encode())
+		tc.Path = fmt.Sprintf("%s?%s", v.Encode())
 	case tc.Payload != nil:
 		body, err = encode(tc.Payload)
 		if err != nil {
