@@ -65,13 +65,13 @@ func (c Client) BuildRequest(def Definition, tc TestCase) (*http.Request, error)
 	switch {
 	case tc.Payload == nil:
 		// do nothing
-	case def.Method == "GET":
+	case tc.Payload != nil && def.Method == "GET":
 		v, err := query.Values(tc.Payload)
 		if err != nil {
 			return fmt.Printf("Err encoding payload into URL string.  Error: %v.\n", err)
 		}
 		tc.Payload = fmt.Sprintf("%s?%s", v.Encode())
-	default:
+	case tc.Payload != nil:
 		body, err = encode(tc.Payload)
 		if err != nil {
 			fmt.Printf("Error encoding payload. Unable to build HTTP request.\n")
