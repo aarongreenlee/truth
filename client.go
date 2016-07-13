@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 type (
@@ -60,7 +62,15 @@ func (c Client) BuildRequest(def Definition, tc TestCase) (*http.Request, error)
 	var body io.Reader
 	var err error
 
-	if tc.Payload != nil {
+	switch {
+	case tc.Payload != nil && def.Method == "GET":
+		v, err := query.Values(tc.Payload)
+		if err != nil {
+			fmt.Printf("Err encoding payload into URL string.  Error: %v.\n", err)
+			return nil, err
+		}
+		tc.Path = fmt.Sprintf("%s?%s", v.Encode())
+	case tc.Payload != nil:
 		body, err = encode(tc.Payload)
 		if err != nil {
 			fmt.Printf("Error encoding payload. Unable to build HTTP request.\n")
