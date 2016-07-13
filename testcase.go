@@ -18,6 +18,7 @@ type (
 		Status     int
 		ExpectBody []byte
 		Contains   []string
+		Options    bool
 
 		Result interface{}
 
