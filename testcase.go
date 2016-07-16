@@ -71,7 +71,7 @@ func (cases TestCases) init(def Definition, caller string) {
 //
 //	testcase := truth.TestCase {
 //		Name:   "Expect Error",
-//		Status: 409,
+//		Status: 400,
 //		Payload: RegisterPayload{
 //			Name:     "John Conner",
 //			Email:    "jconner@cyberdyne-systems.com",
