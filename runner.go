@@ -96,6 +96,10 @@ func NewRunner(c *Client) Runner {
 				RR.HeaderMap[k] = v
 			}
 		} else {
+			if muxUnderTest == nil {
+				t.Fatalf("Unable to execute test. You must first call `truth.SetMux(http.Handler)` to provide truth with a server to test.")
+			}
+
 			var err error
 			var req *http.Request
 
