@@ -60,8 +60,9 @@ func ToggleVerbose() {
 	verbose = !verbose
 }
 
-// NewRunner builds a function to test an API endpoint. Provide a client to perform a full-stack call
-// to a webserver. Without a client the server MUX will be called directly to perform the test in-process.
+// NewRunner builds a function to test an API endpoint. Provide a client to
+// perform a full-stack call to a webserver. Without a client the server MUX
+// will be called directly to perform the test in-process.
 func NewRunner(c *Client) Runner {
 	return func(t *testing.T, def Definition, tc TestCase) error {
 

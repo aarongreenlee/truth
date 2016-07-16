@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http/httptest"
 	"testing"
+	"encoding/json"
 )
 
 type (
@@ -61,4 +62,29 @@ func (cases TestCases) init(def Definition, caller string) {
 	for i, tc := range cases {
 		tc.init(def, i, len(cases), caller)
 	}
+}
+
+// JSON is a simple convenience function to serialize a result into JSON which
+// helps test authors create JSON values without checking for errors.
+//
+// A common use-case is to set an 'ExpectBody' value into a test case:
+//
+//	testcase := truth.TestCase {
+//		Name:   "Expect Error",
+//		Status: 409,
+//		Payload: RegisterPayload{
+//			Name:     "John Conner",
+//			Email:    "jconner@cyberdyne-systems.com",
+//			Password: "Th3Futur3IsN0tS3T",
+//		},
+//		ExpectBody: truth.JSON(map[string]string{
+//			"error": "Unknown username or password",
+//		},
+//	}
+func JSON(v interface{}) []byte {
+	r, err := json.Marshal(v)
+	if (err != nil) {
+		return []byte(fmt.Sprintf("Error serializing JSON value using truth.JSON() function. Unable to serialize %v", v))
+	}
+	return r
 }

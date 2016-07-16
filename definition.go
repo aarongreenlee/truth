@@ -61,8 +61,6 @@ func (def *Definition) Init() error {
 		return fmt.Errorf("Definition's HTTP method %#v is an unknown HTTP method", def.Method)
 	}
 
-	// def.statsKey = strings.ToLower(fmt.Sprintf("%s.%s", def.Package, def.Action))
-
 	def.initialized = true
 
 	return nil
@@ -71,8 +69,6 @@ func (def *Definition) Init() error {
 // NewMetadata returns a new Metadata struct initialized to default values unless
 // customized by passing optional functions.
 func Configure(d Definition, options ...func(*Definition)) Definition {
-	// Now, customize using any options provided
-	//
 	for _, f := range options {
 		f(&d)
 	}
