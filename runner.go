@@ -138,9 +138,8 @@ func NewRunner(c *Client) Runner {
 				return nil
 			}
 
-			if 0 != bytes.Compare(body, tc.ExpectBody) {
-				t.Fatalf("%s: Response was not an exact match", tc.alias)
-				return nil
+			if actual, expected := strings.TrimSpace(string(body)), strings.TrimSpace(string(tc.ExpectBody)); actual != expected {
+				t.Fatalf("%s: Response was not an exact match:\nExpected: `%s`\nReceived: `%s`", tc.alias, expected, actual)
 			}
 
 			return nil
