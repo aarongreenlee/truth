@@ -6,20 +6,35 @@ import (
 )
 
 const (
-	POST    = "POST"
-	GET     = "GET"
-	HEAD    = "HEAD"
-	PUT     = "PUT"
-	PATCH   = "PATCH"
-	DELETE  = "DELETE"
+	// POST HTTP POST Request Method
+	POST = "POST"
+	// GET HTTP GET Request Method
+	GET = "GET"
+	// HEAD HTTP HEAD Request Method
+	HEAD = "HEAD"
+	// PUT HTTP PUT Request Method
+	PUT = "PUT"
+	// PATCH HTTP PATCH Request Method
+	PATCH = "PATCH"
+	// DELETE HTTP DELETE Request Method
+	DELETE = "DELETE"
+	// CONNECT HTTP CONNECT Request Method
 	CONNECT = "CONNECT"
+	// OPTIONS HTTP OPTIONS Request Method
 	OPTIONS = "OPTIONS"
-	TRACE   = "TRACE"
+	// TRACE HTTP TRACE Request Method
+	TRACE = "TRACE"
 
+	// AuthorizationCredentials marks a resource as requiring credentials
+	// be supplied.
 	AuthorizationCredentials = "credentials"
-	AuthenticationChecksum   = "checksum"
-	AuthorizationOpenID      = "openID"
-	AuthorizationNone        = "insecure"
+	// AuthenticationChecksum marks a resource as requiring a checksum
+	// be supplied.
+	AuthenticationChecksum = "checksum"
+	// AuthorizationOpenID marks a resource as requiring OpenID credentials.
+	AuthorizationOpenID = "openID"
+	// AuthorizationNone marks a resource as not requiring credentials.
+	AuthorizationNone = "insecure"
 )
 
 type (
@@ -30,6 +45,11 @@ type (
 		Path             string
 		MIMETypeRequest  string
 		MIMETypeResponse string
+
+		RequestHeaders  map[string]string
+		ResponseHeaders map[string]string
+		RequestBody     interface{}
+		ResponseBody    interface{}
 
 		Authenticated  bool
 		Authentication string
@@ -45,6 +65,8 @@ type (
 	}
 )
 
+// Init bootstraps a new Definition unless the given Definition is
+// already marked as initialized.
 func (def *Definition) Init() error {
 	if def.initialized {
 		return nil
@@ -66,7 +88,7 @@ func (def *Definition) Init() error {
 	return nil
 }
 
-// NewMetadata returns a new Metadata struct initialized to default values unless
+// Configure returns a new Metadata struct initialized to default values unless
 // customized by passing optional functions.
 func Configure(d Definition, options ...func(*Definition)) Definition {
 	for _, f := range options {
@@ -84,7 +106,7 @@ func UsingNoAuth(d *Definition) {
 	d.Authentication = AuthorizationNone
 }
 
-// UsingNoAuth specifies that the provided definition does not require
+// UsingCredentials specifies that the provided definition requires
 // authentication to be accessed.
 func UsingCredentials(d *Definition) {
 	d.Authentication = AuthorizationCredentials
