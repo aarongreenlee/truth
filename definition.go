@@ -48,6 +48,7 @@ type (
 
 		RequestHeaders  map[string]string
 		ResponseHeaders map[string]string
+		QueryParams     interface{}
 		RequestBody     interface{}
 		ResponseBody    interface{}
 
