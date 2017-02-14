@@ -48,8 +48,12 @@ type (
 
 		RequestHeaders  map[string]string
 		ResponseHeaders map[string]string
-		RequestBody     interface{}
-		ResponseBody    interface{}
+		// InputParams URL Path variables /users/{ID}
+		InputParams interface{}
+		// QueryParams Query string parameters
+		QueryParams  interface{}
+		RequestBody  interface{}
+		ResponseBody interface{}
 
 		Authenticated  bool
 		Authentication string
