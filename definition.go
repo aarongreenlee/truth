@@ -52,8 +52,8 @@ type (
 		InputParams interface{}
 		// QueryParams Query string parameters
 		QueryParams  interface{}
-		RequestBody  interface{}
-		ResponseBody interface{}
+		RequestBody  BodyDefinition
+		ResponseBody BodyDefinition
 
 		Authenticated  bool
 		Authentication string
@@ -66,6 +66,15 @@ type (
 		StatsKey    string // Key for instrumentation metrics.
 
 		initialized bool
+	}
+
+	BodyDefinition struct {
+		// PackageName holds a representation of the package holding the response.
+		// Typically if the response is not a custom type, this will be blank.
+		PackageName string
+
+		// Data holds a reference to the data structure that defines the body.
+		Data interface{}
 	}
 )
 
